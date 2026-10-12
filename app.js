@@ -138,7 +138,7 @@
         }] },
         options: {
           responsive: true, maintainAspectRatio: false,
-          animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches || days.length > 100 ? 0 : 250 },
+          animation: false,
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => context.parsed.y === null ? '算出不可' : `${averageMode ? decFmt.format(context.parsed.y) : intFmt.format(context.parsed.y)} ${averageMode ? '分/件' : '件'}` } } },
           scales: {
             x: { grid: { display: false }, ticks: { color: '#4b5565', autoSkip: true, maxTicksLimit: 12, maxRotation: 0 } },
@@ -184,7 +184,7 @@
           indexAxis: 'y',
           maintainAspectRatio: false,
           responsive: true,
-          animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250 },
+          animation: false,
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => context.parsed.x === null ? '算出不可' : `${averageMode ? decFmt.format(context.parsed.x) : intFmt.format(context.parsed.x)} ${averageMode ? '分/件' : '件'}` } } },
           scales: { x: { beginAtZero: true, grid: { color: '#e3e7ed' }, ticks: { color: '#4b5565', precision: averageMode ? 2 : 0, callback: value => averageMode ? decFmt.format(value) : intFmt.format(value) } }, y: { grid: { display: false }, ticks: { color: '#1a1c20', autoSkip: false } } }
         }
