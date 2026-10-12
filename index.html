@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8fafd">
+  <meta name="description" content="CSVから担当者別の処理件数と作業時間を可視化する業務分析デモアプリ。">
+  <title>Process Insight | 業務分析ダッシュボード</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="app-identity"><span class="brand-mark" aria-hidden="true">PI</span><div><strong>Process Insight</strong><span>業務分析ダッシュボード</span></div></div>
+    </div>
+  </header>
+  <main class="workspace">
+    <div class="page-heading"><div><h1>業務分析</h1><p>担当者別の処理件数と作業時間を確認できます。</p></div><span class="demo-badge">デモ用・架空データ</span></div>
+    <section class="data-panel" aria-labelledby="dataTitle">
+      <div class="section-title-row"><div><h2 id="dataTitle">データ</h2><p id="sourceMeta">CSVが読み込まれていません</p></div><span class="privacy-label">データはブラウザ内で処理</span></div>
+      <div class="data-controls">
+        <div class="dropzone" id="dropzone">
+          <span class="drop-icon" aria-hidden="true">↑</span><div class="drop-copy"><strong id="dropTitle">CSVファイルを選択またはドロップ</strong><span>UTF-8形式 · 最大5MB · 20,000行まで</span></div>
+          <button class="button button-primary" id="chooseFile" type="button">CSVを選択</button><input id="fileInput" type="file" accept=".csv,text/csv" hidden>
+        </div>
+        <div class="loaded-file" id="loadedFile" hidden><div class="loaded-file-details"><strong id="loadedFileName"></strong><span id="loadedFileMeta"></span></div><span class="demo-data-label" id="demoDataLabel" hidden>デモデータ</span><button class="button button-outlined" id="changeFile" type="button">CSVを変更</button></div>
+        <div class="secondary-actions"><button class="button button-text" id="downloadSample" type="button">サンプルCSVを保存</button></div>
+      </div>
+      <div class="filter-row"><div class="field date-field"><label for="startDate">開始日</label><input id="startDate" type="date" disabled></div><div class="field date-field"><label for="endDate">終了日</label><input id="endDate" type="date" disabled></div><div class="field"><label for="staffFilter">担当者</label><select id="staffFilter" disabled><option value="">すべての担当者</option></select></div><button class="button button-text" id="resetFilter" type="button" disabled>担当者を解除</button><span class="filter-context" id="filterContext">全データを表示</span></div>
+      <div class="feedback feedback-error" id="filterError" role="alert" hidden></div>
+      <div class="feedback feedback-error" id="errorBox" role="alert" hidden></div><div class="feedback feedback-success" id="successBox" role="status" aria-live="polite" hidden></div>
+    </section>
+    <section class="summary-section" aria-labelledby="kpiTitle"><div class="section-title-row"><h2 id="kpiTitle">概要</h2></div><div class="kpi-strip">
+      <div class="kpi-item"><span>総処理件数</span><strong id="totalCount">—</strong></div><div class="kpi-item"><span>総作業時間</span><strong id="totalMinutes">—</strong></div><div class="kpi-item"><span>平均処理時間</span><strong id="averageMinutes">—</strong><small>総作業時間 ÷ 総処理件数</small></div><div class="kpi-item"><span>データ行数</span><strong id="recordCount">—</strong></div>
+    </div></section>
+    <section class="daily-section" aria-labelledby="dailyTitle">
+      <div class="section-title-row daily-heading"><div><h2 id="dailyTitle">日別推移</h2><p id="dailyDescription">日付ごとの処理件数を表示</p></div><span class="section-note" id="dailyMeta">0 日</span></div>
+      <div class="daily-panel">
+        <div class="daily-segments" role="group" aria-label="日別推移の表示指標">
+          <button class="segment-button" id="dailyCount" aria-pressed="true" type="button">処理件数</button>
+          <button class="segment-button" id="dailyAverage" aria-pressed="false" type="button">平均処理時間（分/件）</button>
+        </div>
+        <div class="daily-chart-scroll" role="region" aria-label="日別推移グラフ。日数が多い場合は横にスクロール" tabindex="0">
+          <div class="daily-chart-frame" id="dailyChartFrame"><canvas id="dailyChart" role="img" aria-label="日別処理件数の折れ線グラフ"></canvas><div class="daily-fallback" id="dailyFallback" hidden></div><div class="empty-chart" id="dailyEmpty"><strong id="dailyEmptyTitle">表示するデータがありません</strong><span id="dailyEmptyDetail">CSVを読み込むと日別推移が表示されます</span></div></div>
+        </div>
+      </div>
+    </section>
+    <section class="analysis-section" aria-labelledby="chartTitle"><div class="section-title-row chart-heading"><div><h2 id="chartTitle">担当者別の処理件数</h2><p id="chartDescription">処理件数が多い順に表示</p></div><span class="section-note" id="chartMeta">0 名の担当者</span></div><div class="chart-panel"><div class="staff-segments" role="group" aria-label="担当者別グラフの表示指標"><button class="segment-button" id="staffCount" aria-pressed="true" type="button">処理件数</button><button class="segment-button" id="staffAverage" aria-pressed="false" type="button">平均処理時間（分/件）</button></div><div class="chart-scroll"><div class="chart-wrapper" id="chartWrapper"><canvas id="staffChart" role="img" aria-label="担当者別処理件数の棒グラフ。詳細数値は下の集計表を参照してください"></canvas><div class="fallback-chart" hidden id="fallbackChart"></div><div class="empty-chart" id="chartEmpty"><strong>表示するデータがありません</strong><span id="chartEmptyDetail">CSVを読み込むとグラフが表示されます</span></div></div></div></div></section>
+    <section class="table-section" aria-labelledby="tableTitle"><div class="section-title-row table-heading"><div><h2 id="tableTitle">担当者別の集計</h2><p id="tableMeta">0 名の担当者</p></div><button class="button button-outlined" id="exportCsv" type="button" disabled>集計結果をCSV出力</button></div><p class="table-scroll-hint">表を横にスクロールすると件数シェアまで確認できます →</p><div class="table-scroll" role="region" aria-label="担当者別集計表。横にスクロールして全列を表示" tabindex="0"><table><thead><tr><th scope="col">担当者</th><th class="numeric" scope="col">処理件数</th><th class="numeric" scope="col">総作業時間（分）</th><th class="numeric" scope="col">平均時間（分/件）</th><th class="numeric" scope="col">期間内全体に対する件数シェア</th></tr></thead><tbody id="resultsBody"><tr><td class="empty-table" colspan="5">CSVを読み込むと集計結果が表示されます</td></tr></tbody></table></div><p class="table-note">平均時間は各担当者の総作業時間 ÷ 総処理件数で算出します。件数シェアは指定期間内の全担当者の総処理件数に対する割合で、担当者フィルターでは分母は変わりません。</p></section>
+    <details class="format-guide" id="guide"><summary>対応CSV形式と入力上の注意</summary><div class="guide-content"><p>必須列は「日付」「担当者」「処理件数」「作業時間（分）」です。列の順番は問いません。日付は YYYY-MM-DD、件数は0以上の整数、時間は0以上の数値を指定してください。</p><pre>日付,担当者,処理件数,作業時間（分）
+2026-10-01,田中,18,63
+2026-10-01,佐藤,14,49</pre><p>不正な行があるCSVは全体を取り消します。公開サイトに実在企業の業務データを入力しないでください。</p></div></details>
+    <footer>Process Insight · 架空データを使用したポートフォリオ用デモ</footer>
+  </main>
+  <script defer src="https://cdn.jsdelivr.net/npm/papaparse@5.7.0/papaparse.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script><script defer src="analytics.js"></script><script defer src="app.js"></script>
+</body>
+</html>
